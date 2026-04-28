@@ -701,16 +701,6 @@ go run . ./examples/gui_hello.tux
 go run . ./examples/gui_designer.tux
 ```
 
-## Current limits
-
-- Closures are not implemented yet.
-- Map keys support strings, numbers, and booleans.
-- Nested functions can resolve globals but do not capture outer locals.
-- Arrays are still `[]` and maps are still `{}` by design, even though the control-flow syntax is Lua-like.
-- Only `while` loops exist right now. There is no `for` loop yet.
-- Variables are assigned by name only. Indexed assignment like `arr[0] = 1` is not currently part of the language.
-- Numbers are runtime `float64` values.
-
 ## Safety notes
 
 - `array[index]`, `string[index]`, and `nil[index]` return `null` when the target is missing instead of crashing the runtime.
