@@ -1,0 +1,7 @@
+local i = 0
+local s = 0
+while i < 1000 do
+  s = s + 1
+  i = i + 1
+end
+print(s)

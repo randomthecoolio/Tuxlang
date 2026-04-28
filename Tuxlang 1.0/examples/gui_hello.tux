@@ -1,0 +1,9 @@
+import gui
+
+local app = gui.newApp()
+local win = gui.newWindow(app, "Tux Hello")
+local label = gui.newLabel("Hello from Tuxlang GUI")
+
+gui.setContent(win, label)
+gui.showWindow(win)
+gui.showAndRun(app)

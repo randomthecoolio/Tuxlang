@@ -1,0 +1,6 @@
+import io
+
+local inp = io.input()
+if inp == "0" then
+    io.print("im cool")
+end
