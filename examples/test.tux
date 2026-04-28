@@ -1,0 +1,17 @@
+import math
+import text
+
+function greet(name)
+    return "Hello, " + text.upper(name) + "!"
+end
+
+local numbers = [1, 2, 3, 4, 5]
+local sum = 0
+local i = 0
+
+while i < len(numbers) do
+    sum = sum + numbers[i]
+    i = i + 1
+end
+
+print(greet("tuxlang"), "Sum:", sum, "Square root of 16:", math.sqrt(16))

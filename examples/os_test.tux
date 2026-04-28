@@ -1,0 +1,7 @@
+import os
+import io
+
+local env = os.getenv("PATH")
+os.setenv("TEST_VAR", "tuxlang")
+local cwd = os.cwd()
+io.print("PATH exists:", bool(env), "CWD:", cwd)

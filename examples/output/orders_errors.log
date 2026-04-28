@@ -1,0 +1,3 @@
+line 4: email is invalid | raw=["Broken Email","wrong-at-email","100","1"]
+line 5: amount cannot be negative | raw=["Nova Group","contact@nova.dev","-20","2"]
+line 7: qty must be greater than zero | raw=["Data Forge","team@forge.dev","120","0"]

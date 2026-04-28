@@ -1,0 +1,8 @@
+import gui
+
+local app = gui.newApp()
+local win = gui.newWindow(app, "Tuxlang GUI")
+local btn = gui.newButton("Click Me")
+gui.setContent(win, btn)
+gui.showWindow(win)
+gui.showAndRun(app)

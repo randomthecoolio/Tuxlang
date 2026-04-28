@@ -1,0 +1,5 @@
+line,customer,email,domain,amount,qty,total,tier
+2,Acme Corp,sales@acme.com,acme.com,150.5,4,602,growth
+3,Skyline LLC,ops@skyline.io,skyline.io,900,3,2700,enterprise
+6,Future Labs,hello@future.ai,future.ai,2500,1,2500,enterprise
+8,Pixel Works,billing@pixel.works,pixel.works,80.25,5,401.25,starter
