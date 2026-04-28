@@ -9,7 +9,7 @@ The syntax is now closer to Lua for readability, but it keeps a few distinct Tux
 - Bytecode execution instead of direct AST walking
 - Simple syntax with 0-based indexing
 - General-purpose control flow, functions, arrays, maps, and strings
-- Production-friendly internals: constant pooling, indexed locals, fixed stack/frame limits, and explicit runtime errors
+- Useful internals: constant pooling, indexed locals, fixed stack/frame limits, and explicit runtime errors
 
 Features
 
