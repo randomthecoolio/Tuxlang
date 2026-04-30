@@ -2,14 +2,22 @@
 
 Tuxlang is a lightweight general-purpose language implemented in Go It compiles source into bytecode and executes that bytecode on a compact stack VM
 
-The syntax is closer to Lua for readability, but it keeps a few distinct Tuxlang choices such as 0-based indexing and square-bracket arrays
+The syntax is now closer to Lua for readability, but it keeps a few distinct Tuxlang choices such as 0-based indexing and square-bracket arrays
+
+Current status:
+
+- integrated optimizer passes directly in the compiler pipeline
+- optimized tagged-value VM hot paths (locals/globals/dispatch)
+- hardened runtime and fuzz harness against hang/crash edge cases
+- `tuxies` uses a bounded shared worker runtime instead of spawning an unbounded goroutine per task
+- GUI backend is native-only on Linux/macOS (browser backend remains fallback for non-native platforms)
 
 --Goals--
 
 - Bytecode execution instead of direct AST walking
 - Simple syntax with 0-based indexing
 - General-purpose control flow, functions, arrays, maps, and strings
-- Useful internals: constant pooling, indexed locals, fixed stack/frame limits, and explicit runtime errors
+- Production-friendly internals: constant pooling, indexed locals, fixed stack/frame limits, and explicit runtime errors
 
 Features
 
@@ -26,6 +34,7 @@ Features
 - compatibility support for older `let` / `fn` / brace blocks
 - null-safe indexing for arrays, strings, and `nil` values
 - runtime errors with function stack context
+- fuzz-tested parser and end-to-end pipeline in `Tests/fuzz_test.go`
 
 
 ## Example
@@ -515,7 +524,7 @@ print(result["action"], result["target"], result["values"]["project"])
 
 #### `tuxies`
 
-- `tuxies.spawn(callable, ...args)` starts a function or bound method in the background and returns a task
+- `tuxies.spawn(callable, ...args)` queues a task on the shared worker runtime and returns a task
 - `tuxies.cancel(task)` requests cancellation of a task
 - `tuxies.cancelAll(tasks)` requests cancellation for every task in an array
 - `tuxies.wait(task)` waits for a task and returns its result
@@ -709,6 +718,27 @@ go run . ./examples/gui_designer.tux
 - `coalesce(a, b, c)` returns the first non-null value.
 - Division by zero, bad calls, and unsupported operations return contextual runtime errors with the active function stack.
 - `&&` and `||` short-circuit.
+- malformed/truncated bytecode operands return clean runtime errors instead of panicking.
+- equality checks on non-comparable host values are panic-safe.
+
+## Reliability and fuzzing
+
+Tuxlang includes fuzz targets inside `Tests`:
+
+- `FuzzParserDoesNotPanic`
+- `FuzzPipelineDoesNotPanic`
+
+Run them with:
+
+```bash
+go test ./Tests -fuzz FuzzParserDoesNotPanic -fuzztime 30s
+go test ./Tests -fuzz FuzzPipelineDoesNotPanic -fuzztime 30s
+```
+
+Fuzz harness safeguards:
+
+- time-boxes pathological non-terminating inputs.
+- skips dangerous side-effect patterns like `os.exit(...)` and `subprocess.run(...)` in fuzz mode.
 
 ## Compatibility notes
 
