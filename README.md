@@ -699,15 +699,15 @@ print(fib(6))
 ## Run
 
 ```bash
-go run . ./examples/demo.tux
+.\tuxlang.exe .\examples\nyfile.tux
 ```
 
 Other useful examples:
 
 ```bash
-go run . ./examples/input.tux
-go run . ./examples/gui_hello.tux
-go run . ./examples/gui_designer.tux
+.\tuxlang.exe .\examples\input.tux
+.\tuxlang.exe .\examples\gui_hello.tux
+.\tuxlang.exe .\examples\gui_designer.tux
 ```
 
 
