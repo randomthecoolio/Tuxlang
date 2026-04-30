@@ -1,8 +1,0 @@
-customer,email,amount,qty
-Acme Corp,sales@acme.com,150.5,4
-Skyline LLC,ops@skyline.io,900,3
-Broken Email,wrong-at-email,100,1
-Nova Group,contact@nova.dev,-20,2
-Future Labs,hello@future.ai,2500,1
-Data Forge,team@forge.dev,120,0
-Pixel Works,billing@pixel.works,80.25,5
