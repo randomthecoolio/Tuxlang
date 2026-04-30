@@ -14,10 +14,10 @@ Current status:
 
 --Goals--
 
-- Bytecode execution instead of direct AST walking
+- Bytecode execution
 - Simple syntax with 0-based indexing
 - General-purpose control flow, functions, arrays, maps, and strings
-- Production-friendly internals: constant pooling, indexed locals, fixed stack/frame limits, and explicit runtime errors
+- useful internals: constant pooling, indexed locals, fixed stack/frame limits, and explicit runtime errors
 
 Features
 
