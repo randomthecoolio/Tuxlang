@@ -3,7 +3,7 @@ Tuxlang Recent Updates
 1. VM Performance Improvements
 - Tagged-value hot paths added for locals/globals
 - Fast opcode dispatch path for hot loop instructions
-- Large-loop benchmark improved from ~21ms to ~5-7ms range depending on system load
+- Large-loop benchmark improved from ~21-15ms to ~5-7ms range depending on system load
 
 3. Concurrency Runtime Upgrade
 - Replaced unbounded per-task goroutine spawning with shared worker-runtime queue
