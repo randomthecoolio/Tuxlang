@@ -1,0 +1,14 @@
+local total = 0
+
+for i = 1, 5 do
+    total = total + i
+end
+
+local reverse = ""
+
+for i = 3, 1, -1 do
+    reverse = reverse + str(i)
+end
+
+print("sum:", total)
+print("reverse:", reverse)

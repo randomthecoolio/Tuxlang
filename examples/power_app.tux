@@ -1,0 +1,248 @@
+import io
+import fs
+import path
+import csv
+import json
+import text
+import regex
+import hash
+import time
+import tuxies
+
+function failRecord(lineNo, message, row)
+    return {
+        "ok": false,
+        "line": lineNo,
+        "error": message,
+        "raw": row
+    }
+end
+
+function cleanSpaces(value)
+    local trimmed = text.trim(value)
+    return regex.replace(" +", trimmed, " ")
+end
+
+function isEmail(value)
+    return regex.match("^[^@ ]+@[^@ ]+[.][^@ ]+$", value)
+end
+
+function isDecimal(value)
+    return regex.match("^[-+]?[0-9]+([.][0-9]+)?$", value)
+end
+
+function isWholeNumber(value)
+    return regex.match("^[0-9]+$", value)
+end
+
+function emailDomain(email)
+    local found = regex.find("@[^@]+$", email)
+    if found == null then
+        return "unknown"
+    end
+    return text.lower(text.replace(found, "@", ""))
+end
+
+function parseOrderRow(row, lineNo)
+    if len(row) < 4 then
+        return failRecord(lineNo, "expected 4 columns: customer,email,amount,qty", row)
+    end
+
+    local customer = cleanSpaces(str(row[0]))
+    local email = text.lower(cleanSpaces(str(row[1])))
+    local amountText = cleanSpaces(str(row[2]))
+    local qtyText = cleanSpaces(str(row[3]))
+
+    if customer == "" then
+        return failRecord(lineNo, "customer is empty", row)
+    end
+    if !isEmail(email) then
+        return failRecord(lineNo, "email is invalid", row)
+    end
+    if !isDecimal(amountText) then
+        return failRecord(lineNo, "amount is not numeric", row)
+    end
+    if !isWholeNumber(qtyText) then
+        return failRecord(lineNo, "qty must be a positive integer", row)
+    end
+
+    local amount = num(amountText)
+    local qty = num(qtyText)
+
+    if amount < 0 then
+        return failRecord(lineNo, "amount cannot be negative", row)
+    end
+    if qty <= 0 then
+        return failRecord(lineNo, "qty must be greater than zero", row)
+    end
+
+    local total = amount * qty
+    local tier = "starter"
+    if total >= 2000 then
+        tier = "enterprise"
+    else
+        if total >= 500 then
+            tier = "growth"
+        end
+    end
+
+    return {
+        "ok": true,
+        "line": lineNo,
+        "customer": customer,
+        "email": email,
+        "domain": emailDomain(email),
+        "amount": amount,
+        "qty": qty,
+        "total": total,
+        "tier": tier
+    }
+end
+
+function toCsvRow(order)
+    return [
+        order["line"],
+        order["customer"],
+        order["email"],
+        order["domain"],
+        order["amount"],
+        order["qty"],
+        order["total"],
+        order["tier"]
+    ]
+end
+
+io.print("=== Tuxlang Power App: Concurrent Order Pipeline ===")
+
+local inputPath = path.join("examples", "power_app_input.csv")
+local outputDir = path.join("examples", "output")
+local cleanedCsvPath = path.join(outputDir, "orders_cleaned.csv")
+local summaryPath = path.join(outputDir, "orders_summary.json")
+local errorsPath = path.join(outputDir, "orders_errors.log")
+
+if !fs.exists(outputDir) then
+    fs.mkdirAll(outputDir)
+end
+
+local sampleCsv = "customer,email,amount,qty\n" +
+    "Acme Corp,sales@acme.com,150.5,4\n" +
+    "Skyline LLC,ops@skyline.io,900,3\n" +
+    "Broken Email,wrong-at-email,100,1\n" +
+    "Nova Group,contact@nova.dev,-20,2\n" +
+    "Future Labs,hello@future.ai,2500,1\n" +
+    "Data Forge,team@forge.dev,120,0\n" +
+    "Pixel Works,billing@pixel.works,80.25,5\n"
+
+fs.writeText(inputPath, sampleCsv)
+local csvText = fs.readText(inputPath)
+local rows = csv.parse(csvText)
+
+assert(len(rows) > 1, "input CSV must include header and at least one data row")
+
+local tasks = []
+local i = 1
+while i < len(rows) do
+    tasks = push(tasks, tuxies.spawn(parseOrderRow, rows[i], i + 1))
+    i = i + 1
+end
+
+local results = tuxies.all(tasks)
+
+local validOrders = []
+local invalidOrders = []
+local domainCounts = {}
+local totalRevenue = 0
+local highestOrderValue = 0
+local highestOrderCustomer = "n/a"
+
+i = 0
+while i < len(results) do
+    local item = results[i]
+    if item["ok"] then
+        validOrders = push(validOrders, item)
+        totalRevenue = totalRevenue + item["total"]
+
+        if item["total"] > highestOrderValue then
+            highestOrderValue = item["total"]
+            highestOrderCustomer = item["customer"]
+        end
+
+        local domain = item["domain"]
+        domainCounts[domain] = coalesce(domainCounts[domain], 0) + 1
+    else
+        invalidOrders = push(invalidOrders, item)
+    end
+    i = i + 1
+end
+
+local cleanedRows = [[
+    "line",
+    "customer",
+    "email",
+    "domain",
+    "amount",
+    "qty",
+    "total",
+    "tier"
+]]
+i = 0
+while i < len(validOrders) do
+    cleanedRows = push(cleanedRows, toCsvRow(validOrders[i]))
+    i = i + 1
+end
+
+local errorLog = ""
+i = 0
+while i < len(invalidOrders) do
+    local errItem = invalidOrders[i]
+    errorLog = errorLog +
+        "line " + str(errItem["line"]) + ": " + errItem["error"] +
+        " | raw=" + json.stringify(errItem["raw"]) + "\n"
+    i = i + 1
+end
+if errorLog == "" then
+    errorLog = "no validation errors\n"
+end
+
+local avgOrderValue = 0
+if len(validOrders) > 0 then
+    avgOrderValue = totalRevenue / len(validOrders)
+end
+
+local summary = {
+    "app": "tuxlang-power-pipeline",
+    "generatedAtUnix": time.now(),
+    "sourceFile": inputPath,
+    "totals": {
+        "rowsSeen": len(rows) - 1,
+        "validOrders": len(validOrders),
+        "invalidOrders": len(invalidOrders),
+        "revenue": totalRevenue,
+        "avgOrderValue": avgOrderValue
+    },
+    "highestOrder": {
+        "customer": highestOrderCustomer,
+        "value": highestOrderValue
+    },
+    "domainCounts": domainCounts
+}
+
+local summaryJson = json.stringify(summary)
+local checksum = hash.sha256(summaryJson)
+summary["sha256"] = checksum
+summaryJson = json.stringify(summary)
+
+fs.writeText(cleanedCsvPath, csv.stringify(cleanedRows))
+fs.writeText(errorsPath, errorLog)
+fs.writeText(summaryPath, summaryJson)
+
+io.print("Processed rows:", len(rows) - 1)
+io.print("Valid orders:", len(validOrders))
+io.print("Invalid orders:", len(invalidOrders))
+io.print("Total revenue:", totalRevenue)
+io.print("Average order value:", avgOrderValue)
+io.print("Highest order:", highestOrderCustomer, highestOrderValue)
+io.print("Summary SHA256:", checksum)
+io.print("Wrote:", cleanedCsvPath)
+io.print("Wrote:", summaryPath)
+io.print("Wrote:", errorsPath)

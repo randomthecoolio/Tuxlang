@@ -1,0 +1,27 @@
+Tuxlang Recent Updates
+
+1. VM Performance Improvements
+- Tagged-value hot paths added for locals/globals
+- Fast opcode dispatch path for hot loop instructions
+- Large-loop benchmark improved from ~21ms to ~5-7ms range depending on system load
+
+3. Concurrency Runtime Upgrade
+- Replaced unbounded per-task goroutine spawning with shared worker-runtime queue
+- Preserved tuxies behavior: spawn/join/wait/all/race/group/cancel/status/done
+- Improved stability under high task fan-out
+
+4. Reliability Stuff
+- Added truncated-bytecode operand guards in VM loops
+- Added panic-safe equality fallback behavior
+- Added parser token-read safety limit for pathological inputs
+- Added core execution limits support (op/time budget APIs in VM)
+
+5. GUI Cross-Platform Consistency
+- Linux/macOS use native GUI path only
+- Windows event output flow aligned to JSON result contract
+- Added GUI decode robustness for noisy output lines
+
+6. Fuzzing Improvements
+- Added fuzz tests in Tests/fuzz_test.go
+  - FuzzParserDoesNotPanic
+  - FuzzPipelineDoesNotPanic

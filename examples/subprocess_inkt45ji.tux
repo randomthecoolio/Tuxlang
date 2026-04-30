@@ -1,0 +1,10 @@
+import subprocess
+import os
+
+local tag = "inkt45ji"
+
+if os.cwd() != "" then
+    print("running subprocess example:", tag)
+end
+
+subprocess.run("cmd", "/c", "echo " + tag)
