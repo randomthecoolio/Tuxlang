@@ -7,7 +7,6 @@ Tuxlang Recent Updates
 
 3. Concurrency Runtime Upgrade
 - Replaced unbounded per-task goroutine spawning with shared worker-runtime queue
-- Preserved tuxies behavior: spawn/join/wait/all/race/group/cancel/status/done
 - Improved stability under high task fan-out
 
 4. Reliability Stuff
