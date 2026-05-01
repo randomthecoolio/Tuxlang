@@ -1,4 +1,4 @@
---Tuxlang--
+-Tuxlang--
 
 Tuxlang is a lightweight general-purpose language implemented in Go It compiles source into bytecode and executes that bytecode on a compact stack VM
 
@@ -10,7 +10,7 @@ Current status:
 - optimized tagged-value VM hot paths (locals/globals/dispatch)
 - hardened runtime and fuzz harness against hang/crash edge cases
 - `tuxies` uses a bounded shared worker runtime instead of spawning an unbounded goroutine per task
-- GUI backend is native-only on Linux/macOS (browser backend remains fallback for non-native platforms)
+- GUI backend is native-only on Linux/macOS/Windows
 
 --Goals--
 
@@ -30,7 +30,7 @@ Features
 - numbers, strings, booleans, `null`
 - arrays, maps, and 0-based indexing
 - core built-ins: `print`, `len`, `push`, `type`, `str`, `num`, `bool`, `keys`, `has`, `coalesce`, `assert`, `range`, `sum`
-- 25 importable built-in stdlib modules: `math`, `text`, `array`, `maplib`, `rand`, `base64`, `hash`, `url`, `uuid`, `conv`, `safe`, `io`, `time`, `tuxies`, `json`, `path`, `fs`, `os`, `subprocess`, `file`, `gui`, `net`, `csv`, `regex`
+- 26 importable built-in stdlib modules: `math`, `text`, `array`, `maplib`, `rand`, `base64`, `hash`, `url`, `uuid`, `conv`, `safe`, `io`, `time`, `tuxies`, `json`, `path`, `fs`, `os`, `subprocess`, `file`, `tuxiler`, `gui`, `net`, `csv`, `regex`
 - compatibility support for older `let` / `fn` / brace blocks
 - null-safe indexing for arrays, strings, and `nil` values
 - runtime errors with function stack context
@@ -404,6 +404,7 @@ Available built-in modules:
 - `os`: `getenv`, `setenv`, `cwd`, `exit`
 - `subprocess`: `run`
 - `file`: `read`, `write`
+- `tuxiler`: `build`, `self_build`
 - `net`: `httpGet`
 - `gui`: `newApp`, `newWindow`, `newButton`, `newLabel`, `newTextInput`, `newPanel`, `add`, `setContent`, `setID`, `setText`, `setPosition`, `setSize`, `setWindowSize`, `setWindowPosition`, `setBackground`, `setColors`, `setFontSize`, `setPlaceholder`, `setValue`, `getValue`, `showWindow`, `showAndRun`
 
@@ -609,6 +610,19 @@ Note: this is a simple slash-joiner, not a full OS-aware path normalizer.
 - `file.read(path)`
 - `file.write(path, content)`
 
+#### `tuxiler`
+
+- `tuxiler.build(targetPath, outputPath?)` packages a `.tux` program as a standalone executable.
+- `tuxiler.self_build(outputPath?)` packages the currently running `.tux` file.
+
+Notes:
+- `tuxiler.build` can locate target files by walking subfolders from the current working directory when the direct path is not found.
+- Packaging embeds Tux source into the runtime executable and does not invoke `go build` from Tux code.
+- Build target is native to the runtime that is currently executing (`runtime.GOOS`/`runtime.GOARCH`).
+- Script directives are supported (either plain lines or `//` comment directives):
+- `exit_window: true|false` controls whether runtime waits for Enter before closing (default `false`, so it waits only in interactive terminals).
+- `show_console: true|false` controls runtime console visibility behavior on all platforms (default `true`); on Windows packaged binaries it also sets PE subsystem (`true`=console, `false`=GUI).
+
 #### `net`
 
 - `net.httpGet(url)`
@@ -700,6 +714,14 @@ print(fib(6))
 
 ```bash
 .\tuxlang.exe .\examples\nyfile.tux
+```
+
+If you are on macOS or Linux:
+
+```bash
+./tuxlang ./examples/nyfile.tux
+bash -c './tuxlang ./examples/nyfile.tux'
+sh -c './tuxlang ./examples/nyfile.tux'
 ```
 
 Other useful examples:
