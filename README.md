@@ -2,7 +2,7 @@
 
 Tuxlang is a lightweight general-purpose language implemented in Go It compiles source into bytecode and executes that bytecode on a compact stack VM
 
-The syntax is now closer to Lua for readability, but it keeps a few distinct Tuxlang choices such as 0-based indexing and square-bracket arrays
+The syntax is closer to Lua for readability, but it keeps a few distinct Tuxlang choices such as 0-based indexing and square-bracket arrays
 
 Current status:
 
