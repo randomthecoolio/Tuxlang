@@ -1,4 +1,4 @@
-Tuxlang Recent Updates 1.2
+Tuxlang Recent Updates 1.3
 
 1. VM Performance Improvements
 - Tagged-value hot paths added for locals/globals
@@ -24,3 +24,19 @@ Tuxlang Recent Updates 1.2
 - Added fuzz tests in Tests/fuzz_test.go
   - FuzzParserDoesNotPanic
   - FuzzPipelineDoesNotPanic
+
+7. New Built-in Module: tuxiler
+- Added stdlib module `tuxiler`
+- `tuxiler.build(targetPath, outputPath?)` packages a `.tux` program into a native Binary depending on the OS
+- `tuxiler.self_build(outputPath?)` packages the currently running script
+- `build` can resolve target files in nested folders from the current working directory
+- Packaging embeds source into the runtime executable
+- Native target detection is automatic from the running runtime OS/arch
+
+8. Runtime Script Directives
+- Added script directives (plain line or `//` comment):
+  - `exit_window: true|false`
+  - `show_console: true|false`
+- `exit_window` is cross-platform and waits for Enter only in interactive terminals
+- `show_console` is cross-platform runtime behavior (suppresses stdout/stderr when false)
+- On Windows packaged binaries, `show_console` also sets PE subsystem (console vs GUI)
