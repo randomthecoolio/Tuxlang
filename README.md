@@ -34,7 +34,6 @@ Features
 - compatibility support for older `let` / `fn` / brace blocks
 - null-safe indexing for arrays, strings, and `nil` values
 - runtime errors with function stack context
-- fuzz-tested parser and end-to-end pipeline in `Tests/fuzz_test.go`
 
 
 ## Example
